@@ -1,146 +1,303 @@
 @extends('template.main-template')
 
+@section('title', 'Keranjang Belanja - Kerajinan Nusantara')
+
 @section('content')
 
-    <div class="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-8">
+@php
+    // Pastikan variabel selalu ada (dari CartController)
+    $cartItems   = $cartItems ?? [];
+    $totalQty    = $totalQty ?? 0;
+    $totalPrice  = $totalPrice ?? 0;
+@endphp
 
-        <h1 class="text-3xl font-bold text-gray-900 mb-8 flex items-center">
-            <svg class="w-8 h-8 mr-3 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+{{-- Hero Banner --}}
+<section class="bg-gradient-to-r from-primary-800 to-primary-900 py-12 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+    </div>
+    <div class="container mx-auto px-4 relative z-10">
+        <nav class="flex items-center gap-2 text-primary-300 text-sm mb-4">
+            <a href="{{ url('/') }}" class="hover:text-white transition-colors">Beranda</a>
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            <span class="text-white">Keranjang</span>
+        </nav>
+        <h1 class="font-display text-3xl md:text-4xl font-bold text-white flex items-center gap-3">
+            <i data-lucide="shopping-cart" class="w-8 h-8"></i>
             Keranjang Belanja
         </h1>
+    </div>
+</section>
 
-        <form method="POST" action="{{ route('checkout.process') }}">
-            @csrf
+{{-- Main Content --}}
+<section class="py-8 bg-primary-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="grid lg:grid-cols-3 gap-8">
 
-            {{-- Daftar Produk di Keranjang --}}
-            <div class="space-y-8 mb-8 border-b border-gray-200 pb-8">
-
-                @php
-                    $cartItems = [
-                        ['id' => 1, 'name' => 'Tas Kayu', 'price' => 150000, 'stock' => 10, 'qty' => 1, 'rating' => 4.7, 'image' => 'tas_kayu.jpg'],
-                        ['id' => 2, 'name' => 'Meja Kayu', 'price' => 200000, 'stock' => 5, 'qty' => 1, 'rating' => 4.8, 'image' => 'meja_kayu.jpg'],
-                    ];
-                @endphp
-
-                @foreach ($cartItems as $item)
-                <div class="flex items-start p-4 border border-gray-200 rounded-lg bg-gray-50">
-
-                    {{-- Checkbox Pilih Item --}}
-                    <input type="checkbox" name="selected_items[]" value="{{ $item['id'] }}"
-                           checked class="w-6 h-6 text-red-600 rounded border-gray-300 focus:ring-red-500 mr-4 mt-1" onchange="updateTotal()">
-
-                    {{-- Gambar Produk --}}
-                    <div class="flex-shrink-0 mr-4">
-                        <img src="{{ asset('images/' . rawurlencode(basename($item['image']))) }}" alt="{{ $item['name'] }}" class="w-24 h-24 object-cover rounded-md shadow-sm">
+            {{-- Cart Items --}}
+            <div class="lg:col-span-2">
+                @if(count($cartItems) > 0)
+                    {{-- Select All --}}
+                    <div class="bg-white rounded-2xl shadow-sm border border-primary-100 p-4 mb-4">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="select-all" checked class="w-5 h-5 rounded border-primary-300 text-primary-600 focus:ring-primary-500">
+                            <span class="font-medium text-primary-900">
+                                Pilih Semua ({{ count($cartItems) }} produk)
+                            </span>
+                        </label>
                     </div>
 
-                    {{-- Detail Item --}}
-                    <div class="flex-grow">
-                        <div class="flex justify-between items-center mb-1">
-                            <h2 class="text-xl font-semibold text-gray-900">{{ $item['name'] }}</h2>
-                            <span class="text-sm text-yellow-500 flex items-center ml-4">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.963a1 1 0 00.95.69h4.17c.969 0 1.371 1.24.588 1.81l-3.374 2.454a1 1 0 00-.364 1.118l1.286 3.963c.3.921-.755 1.688-1.54 1.118l-3.374-2.454a1 1 0 00-1.176 0l-3.374 2.454c-.784.57-1.84-.197-1.54-1.118l1.286-3.963a1 1 0 00-.364-1.118L2.091 9.39c-.783-.57-.381-1.81.588-1.81h4.17a1 1 0 00.95-.69l1.286-3.963z"></path></svg>
-                                {{ $item['rating'] }}
+                    {{-- Cart Items List --}}
+                    <div class="space-y-4">
+                        @foreach ($cartItems as $item)
+                            @php
+                                $slug   = $item['slug']  ?? '';
+                                $name   = $item['name']  ?? 'Produk';
+                                $price  = (int)($item['price'] ?? 0);
+                                $qty    = (int)($item['qty']   ?? 1);
+                                $image  = $item['image'] ?? null;
+                                // stok dari session (bisa null kalau belum diset)
+                                $stock  = isset($item['stock']) ? (int)$item['stock'] : null;
+                                $seller = $item['seller'] ?? 'Penjual Kerajinan';
+                                $rating = $item['rating'] ?? 5;
+                            @endphp
+
+                            <div class="bg-white rounded-2xl shadow-sm border border-primary-100 p-5 cart-item" data-slug="{{ $slug }}">
+                                <div class="flex gap-4">
+                                    {{-- Checkbox --}}
+                                    <div class="flex items-start pt-1">
+                                        <input type="checkbox" name="selected_items[]" value="{{ $slug }}"
+                                               checked
+                                               class="item-checkbox w-5 h-5 rounded border-primary-300 text-primary-600 focus:ring-primary-500">
+                                    </div>
+
+                                    {{-- Image --}}
+                                    <div class="flex-shrink-0">
+                                        @php
+                                            $fallbackImage = 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=200&h=200&fit=crop';
+                                            $src = $image ? asset('images/' . rawurlencode(basename($image))) : $fallbackImage;
+                                        @endphp
+                                        <img src="{{ $src }}" alt="{{ $name }}"
+                                             class="w-24 h-24 md:w-28 md:h-28 object-cover rounded-xl">
+                                    </div>
+
+                                    {{-- Details --}}
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-start justify-between gap-4">
+                                            <div>
+                                                <h3 class="font-semibold text-primary-900 mb-1">
+                                                    {{ $name }}
+                                                </h3>
+                                                <p class="text-sm text-primary-500 mb-2">
+                                                    {{ $seller }}
+                                                </p>
+                                                <div class="flex items-center gap-1 mb-2">
+                                                    @for($i = 0; $i < $rating; $i++)
+                                                        <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+                                                    @endfor
+                                                </div>
+                                            </div>
+
+                                            {{-- Tombol hapus -> panggil route cart.remove (hapus dari session) --}}
+                                            <a href="{{ route('cart.remove', ['slug' => $slug]) }}"
+                                               class="p-2 text-primary-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                               onclick="return confirm('Hapus produk ini dari keranjang?')">
+                                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                            </a>
+                                        </div>
+
+                                        <div class="flex items-end justify-between mt-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex items-center border border-primary-200 rounded-lg">
+                                                    <button type="button"
+                                                            class="qty-btn minus w-9 h-9 flex items-center justify-center text-primary-600 hover:bg-primary-50 rounded-l-lg transition-colors">
+                                                        <i data-lucide="minus" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <input type="number"
+                                                           value="{{ $qty }}"
+                                                           min="1"
+                                                           max="{{ $stock ?? 99 }}"
+                                                           data-price="{{ $price }}"
+                                                           class="quantity-input w-12 h-9 text-center border-x border-primary-200 text-primary-900 font-medium focus:outline-none">
+                                                    <button type="button"
+                                                            class="qty-btn plus w-9 h-9 flex items-center justify-center text-primary-600 hover:bg-primary-50 rounded-r-lg transition-colors">
+                                                        <i data-lucide="plus" class="w-4 h-4"></i>
+                                                    </button>
+                                                </div>
+                                                <span class="text-sm text-primary-500">
+                                                    Stok: {{ $stock !== null ? $stock : '-' }}
+                                                </span>
+                                            </div>
+                                            <p class="text-lg font-bold text-primary-700">
+                                                Rp {{ number_format($price, 0, ',', '.') }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    {{-- Empty Cart State --}}
+                    <div class="bg-white rounded-2xl shadow-sm border border-primary-100 p-12 text-center">
+                        <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i data-lucide="shopping-cart" class="w-10 h-10 text-primary-400"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-primary-900 mb-2">Keranjang Kosong</h3>
+                        <p class="text-primary-500 mb-6">Belum ada produk di keranjang Anda</p>
+                        <a href="{{ route('products.page') }}"
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors">
+                            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                            Mulai Belanja
+                        </a>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Order Summary --}}
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-sm border border-primary-100 p-6 sticky top-24">
+                    <h2 class="font-semibold text-lg text-primary-900 mb-6 flex items-center gap-2">
+                        <i data-lucide="receipt" class="w-5 h-5 text-primary-600"></i>
+                        Ringkasan Belanja
+                    </h2>
+
+                    <div class="space-y-4 mb-6">
+                        <div class="flex justify-between text-primary-600">
+                            <span>Total Harga (<span id="item-count">{{ $totalQty }}</span> barang)</span>
+                            <span id="subtotal">
+                                Rp {{ number_format($totalPrice, 0, ',', '.') }}
                             </span>
                         </div>
-
-                        <p class="text-lg font-medium text-gray-700">Harga: Rp {{ number_format($item['price'], 0, ',', '.') }}</p>
-                        <p class="text-sm text-gray-500">Stok tersedia: {{ $item['stock'] }} pcs</p>
-
-                        <div class="flex items-center mt-3">
-                            <label for="qty_{{ $item['id'] }}" class="text-sm text-gray-600 mr-2">Jumlah:</label>
-                            <input type="number" name="qty[{{ $item['id'] }}]" id="qty_{{ $item['id'] }}" value="{{ $item['qty'] }}"
-                                   min="1" max="{{ $item['stock'] }}" data-price="{{ $item['price'] }}"
-                                   class="w-16 p-1 border border-gray-400 rounded-md text-center quantity-input" onchange="updateTotal()">
+                        <div class="flex justify-between text-primary-600">
+                            <span>Diskon</span>
+                            <span class="text-green-600">- Rp 0</span>
+                        </div>
+                        <div class="border-t border-primary-200 pt-4">
+                            <div class="flex justify-between">
+                                <span class="font-semibold text-primary-900">Total</span>
+                                <span id="total-price" class="text-xl font-bold text-primary-700">
+                                    Rp {{ number_format($totalPrice, 0, ',', '.') }}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Tombol Lihat Detail (Di Sisi Kanan Atas) --}}
-                    <a href="{{ route('product.detail', ['id' => $item['id']]) }}" class="text-xs text-white bg-gray-700 hover:bg-gray-800 px-3 py-1 rounded-md">
-                        Lihat Detail
+                    {{-- Promo Code --}}
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-primary-700 mb-2">Kode Promo</label>
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="Masukkan kode"
+                                   class="flex-1 px-4 py-2.5 border border-primary-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
+                            <button class="px-4 py-2.5 bg-primary-100 text-primary-700 font-medium rounded-xl hover:bg-primary-200 transition-colors text-sm">
+                                Terapkan
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Checkout Button --}}
+                    <a href="{{ route('checkout') }}"
+                       class="btn-shine w-full py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/30 flex items-center justify-center gap-2">
+                        <i data-lucide="credit-card" class="w-5 h-5"></i>
+                        Checkout Sekarang
+                    </a>
+
+                    {{-- Continue Shopping --}}
+                    <a href="{{ route('products.page') }}"
+                       class="mt-4 w-full py-3 border border-primary-200 text-primary-700 font-medium rounded-xl hover:bg-primary-50 transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        Lanjut Belanja
                     </a>
                 </div>
-                @endforeach
-
-            </div> {{-- End Daftar Produk --}}
-
-            {{-- Footer Keranjang (Total dan Checkout) --}}
-            <div class="flex justify-between items-center pt-4">
-
-                <div class="flex items-center space-x-3">
-                    <input type="checkbox" id="select-all" class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500" onchange="toggleAll(this)">
-                    <label for="select-all" class="text-lg font-medium text-gray-700">Semua</label>
-                </div>
-
-                <div class="flex items-center space-x-6">
-                    <span class="text-xl font-medium text-gray-800">Total</span>
-                    <span id="total-price" class="text-2xl font-extrabold text-gray-900">Rp 350.000</span>
-
-                    <button type="submit" class="px-8 py-3 text-lg font-bold text-white rounded-lg shadow-md hover:opacity-90 transition duration-150" style="background-color: #934c26;">
-                        Checkout
-                    </button>
-                </div>
             </div>
-        </form>
-
+        </div>
     </div>
+</section>
 
-@endsection
-
-@push('scripts')
 <script>
-    // Fungsi untuk memformat angka menjadi format mata uang Rupiah
+document.addEventListener('DOMContentLoaded', function() {
     const formatRupiah = (number) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0
-        }).format(number);
+        return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
     };
 
     function updateTotal() {
         let total = 0;
-        const items = document.querySelectorAll('.quantity-input');
-        const selectAllCheckbox = document.getElementById('select-all');
-        let allChecked = true;
+        let itemCount = 0;
+        const items = document.querySelectorAll('.cart-item');
 
-        items.forEach(input => {
-            const checkbox = input.closest('.flex.items-start').querySelector('input[type="checkbox"]');
+        items.forEach(item => {
+            const checkbox = item.querySelector('.item-checkbox');
+            const qtyInput = item.querySelector('.quantity-input');
 
-            if (checkbox.checked) {
-                const price = parseFloat(input.getAttribute('data-price'));
-                const quantity = parseInt(input.value);
-                total += price * quantity;
-            } else {
-                allChecked = false;
+            if (checkbox && checkbox.checked && qtyInput) {
+                const price = parseFloat(qtyInput.dataset.price);
+                const qty   = parseInt(qtyInput.value);
+                total      += price * qty;
+                itemCount  += qty;
             }
         });
 
-        document.getElementById('total-price').textContent = formatRupiah(total);
-        // Menjaga agar checkbox 'Semua' sinkron
-        if (selectAllCheckbox) {
-            selectAllCheckbox.checked = allChecked;
+        const totalPriceEl = document.getElementById('total-price');
+        const subtotalEl   = document.getElementById('subtotal');
+        const itemCountEl  = document.getElementById('item-count');
+
+        if (totalPriceEl) totalPriceEl.textContent = formatRupiah(total);
+        if (subtotalEl)   subtotalEl.textContent   = formatRupiah(total);
+        if (itemCountEl)  itemCountEl.textContent  = itemCount;
+
+        // Sync select all checkbox
+        const allCheckboxes = document.querySelectorAll('.item-checkbox');
+        const selectAll = document.getElementById('select-all');
+        if (selectAll && allCheckboxes.length > 0) {
+            selectAll.checked = Array.from(allCheckboxes).every(cb => cb.checked);
         }
     }
 
-    function toggleAll(source) {
-        const checkboxes = document.querySelectorAll('input[name="selected_items[]"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = source.checked;
+    // Select all functionality
+    const selectAllEl = document.getElementById('select-all');
+    if (selectAllEl) {
+        selectAllEl.addEventListener('change', function() {
+            document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = this.checked);
+            updateTotal();
         });
-        updateTotal();
     }
 
-    // Event listener untuk inisialisasi dan perubahan
-    document.addEventListener('DOMContentLoaded', function() {
-        // Attach listeners to all relevant inputs
-        const inputs = document.querySelectorAll('.quantity-input, input[name="selected_items[]"]');
-        inputs.forEach(input => {
-            input.addEventListener('change', updateTotal);
-        });
-
-        // Panggil pertama kali untuk menghitung total awal
-        updateTotal();
+    // Individual checkbox change
+    document.querySelectorAll('.item-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateTotal);
     });
+
+    // Quantity buttons
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('.quantity-input');
+            let value = parseInt(input.value);
+            const max = parseInt(input.max);
+
+            if (this.classList.contains('minus') && value > 1) {
+                input.value = value - 1;
+            } else if (this.classList.contains('plus') && value < max) {
+                input.value = value + 1;
+            }
+            updateTotal();
+        });
+    });
+
+    // Quantity input change
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const max = parseInt(this.max);
+            const min = 1;
+            let value = parseInt(this.value);
+
+            if (value < min) this.value = min;
+            if (value > max) this.value = max;
+            updateTotal();
+        });
+    });
+
+    updateTotal();
+});
 </script>
-@endpush
+
+@endsection

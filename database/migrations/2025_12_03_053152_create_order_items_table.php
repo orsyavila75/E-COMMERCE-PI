@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sellers', function (Blueprint $table) {
-    $table->id(); // <-- otomatis bigIncrements unsigned
-    $table->string('nama');
-    $table->string('no_telepon', 20);
-    $table->string('email')->unique();
-    $table->timestamps();
-});
-
+        Schema::create('order_items', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -26,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('order_items');
     }
 };

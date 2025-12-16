@@ -9,7 +9,7 @@
     @endif
 
     @if(empty($cart) || count($cart) === 0)
-        <p>Keranjang kosong. <a href="{{ route('product.index') }}" class="text-blue-600">Kembali ke produk</a></p>
+        <p>Keranjang kosong. <a href="{{ route('products.page') }}" class="text-blue-600">Kembali ke produk</a></p>
     @else
         <form action="{{ route('checkout.process') }}" method="POST">
             @csrf

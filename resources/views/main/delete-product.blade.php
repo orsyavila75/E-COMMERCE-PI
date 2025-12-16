@@ -7,7 +7,7 @@
         <p class="text-xl text-gray-600 mb-8">Kelola produk kerajinan tangan lokal Anda</p>
 
         {{-- Form untuk Aksi Penghapusan Massal --}}
-        <form id="delete-form" action="{{ route('seller.product.bulk_delete') }}" method="POST">
+        <form id="delete-form" action="#" method="POST">
             @csrf
             @method('DELETE')
 
