@@ -13,7 +13,7 @@
             </p>
         </div>
 
-        <form action="{{ route('user.account.request_delete') }}" method="POST">
+        <form action="#" method="POST">
             @csrf
 
             {{-- Input konfirmasi password untuk keamanan --}}

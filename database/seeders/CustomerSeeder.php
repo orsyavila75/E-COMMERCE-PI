@@ -6,52 +6,17 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class UsersSeeder extends Seeder
+class CustomerSeeder extends Seeder
 {
     /**
-     * Jalankan database seeder.
+     * Seed data customer.
      */
     public function run(): void
     {
-        DB::table('users')->insert([
-            // SELLER
-            [
-                'name' => 'Galeri Anyaman Nusantara',
-                'email' => 'anyaman@nusantara.com',
-                'password' => Hash::make('password'), // default
-                'no_telepon' => '081234567890',
-                'alamat' => 'Yogyakarta',
-                'role' => 'seller',
-            ],
-            [
-                'name' => 'Ukir Kayu Bali',
-                'email' => 'ukirbali@art.com',
-                'password' => Hash::make('password'),
-                'no_telepon' => '081345678901',
-                'alamat' => 'Bali',
-                'role' => 'seller',
-            ],
-            [
-                'name' => 'Batik Canting Ratu',
-                'email' => 'batik@cantingratu.com',
-                'password' => Hash::make('password'),
-                'no_telepon' => '081456789012',
-                'alamat' => 'Pekalongan',
-                'role' => 'seller',
-            ],
-            [
-                'name' => 'Rajut Cipta Karya',
-                'email' => 'rajut@ciptakarya.com',
-                'password' => Hash::make('password'),
-                'no_telepon' => '081567890123',
-                'alamat' => 'Bandung',
-                'role' => 'seller',
-            ],
-
-            // CUSTOMER
+        DB::table('users')->upsert([
             [
                 'name' => 'Rina Maharani',
-                'email' => 'rina@example.com',
+                'email' => 'rina@gmail.com',
                 'password' => Hash::make('password'),
                 'no_telepon' => '081222333444',
                 'alamat' => 'Jl. Kaliurang Km 7, Sleman, Yogyakarta',
@@ -59,7 +24,7 @@ class UsersSeeder extends Seeder
             ],
             [
                 'name' => 'Yoga Prasetyo',
-                'email' => 'yoga@example.com',
+                'email' => 'yoga@gmail.com',
                 'password' => Hash::make('password'),
                 'no_telepon' => '081333444555',
                 'alamat' => 'Jl. Parangtritis No.18, Bantul, Yogyakarta',
@@ -67,7 +32,7 @@ class UsersSeeder extends Seeder
             ],
             [
                 'name' => 'Sari Puspita',
-                'email' => 'sari@example.com',
+                'email' => 'sari@gmail.com',
                 'password' => Hash::make('password'),
                 'no_telepon' => '081444555666',
                 'alamat' => 'Jl. Malioboro No.22, Kota Yogyakarta',
@@ -75,7 +40,7 @@ class UsersSeeder extends Seeder
             ],
             [
                 'name' => 'Dewi Lestari',
-                'email' => 'dewi@example.com',
+                'email' => 'dewi@gmail.com',
                 'password' => Hash::make('password'),
                 'no_telepon' => '081555666777',
                 'alamat' => 'Jl. Wates Km 10, Kulon Progo, Yogyakarta',
@@ -83,7 +48,7 @@ class UsersSeeder extends Seeder
             ],
             [
                 'name' => 'Agus Saputra',
-                'email' => 'agus@example.com',
+                'email' => 'agus@gmail.com',
                 'password' => Hash::make('password'),
                 'no_telepon' => '081666777888',
                 'alamat' => 'Jl. Imogiri Timur No.15, Bantul, Yogyakarta',
@@ -91,12 +56,12 @@ class UsersSeeder extends Seeder
             ],
             [
                 'name' => 'Ratna Kartika',
-                'email' => 'ratna@example.com',
+                'email' => 'ratna@gmail.com',
                 'password' => Hash::make('password'),
                 'no_telepon' => '082222333444',
                 'alamat' => 'Jl. Prawirotaman No.12, Kota Yogyakarta',
                 'role' => 'customer',
             ],
-        ]);
+        ], ['email'], ['name', 'password', 'no_telepon', 'alamat', 'role']);
     }
 }

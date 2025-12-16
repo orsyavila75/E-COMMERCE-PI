@@ -45,7 +45,7 @@
         {{-- ======================================================== --}}
         <div id="cart-section" class="mt-16 bg-gray-100 p-8 rounded-xl shadow-inner max-w-4xl mx-auto">
 
-            <a href="{{ route('products.index') }}" class="text-gray-600 hover:text-gray-900 flex items-center mb-6">
+            <a href="{{ route('products.page') }}" class="text-gray-600 hover:text-gray-900 flex items-center mb-6">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Kembali ke Katalog Produk
             </a>
@@ -70,7 +70,7 @@
                         Meja kayu minimalis berbahan dasar kayu jati solid. Tahan lama dan cocok untuk ruang kerja atau ruang tamu dengan gaya natural.
                     </p>
 
-                    <form action="{{ route('cart.add') }}" method="POST" class="mt-4">
+                    <form action="{{ route('cart') }}" method="POST" class="mt-4">
                         @csrf
                         {{-- ID produk Meja Kayu --}}
                         <input type="hidden" name="product_id" value="4">

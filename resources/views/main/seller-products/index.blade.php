@@ -1,10 +1,13 @@
 @extends('template.main-template')
 
 @section('content')
+@php
+    $products = $products ?? collect([]);
+@endphp
 <div class="max-w-6xl mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold">Kelola Produk Saya</h1>
-        <a href="{{ route('seller.products.create') }}" class="px-4 py-2 bg-green-600 text-white rounded">Tambah Produk</a>
+        <a href="{{ route('seller.add-product') }}" class="px-4 py-2 bg-green-600 text-white rounded">Tambah Produk</a>
     </div>
 
     @if(session('success'))

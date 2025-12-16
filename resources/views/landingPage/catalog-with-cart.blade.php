@@ -70,7 +70,7 @@
                         Tas kayu desain unik, cocok sehari-hari dan acara santai, kuat dan tahan lama.
                     </p>
 
-                    <form action="{{ route('cart.add') }}" method="POST" class="mt-6">
+                    <form action="{{ route('cart') }}" method="POST" class="mt-6">
                         @csrf
                         <input type="hidden" name="product_id" value="1"> {{-- Ganti dengan ID produk yang sebenarnya --}}
 

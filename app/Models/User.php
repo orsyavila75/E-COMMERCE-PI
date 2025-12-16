@@ -2,55 +2,46 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-
     protected $table = 'users';
-
     protected $primaryKey = 'id_user';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'no_telepon',
-        'alamat',
-        'role',
+        'name','email','password','no_telepon','alamat','role'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password','remember_token'
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // kalau role seller → ada 1 data di tabel seller
+    public function seller(): HasOne
+    {
+        return $this->hasOne(Seller::class, 'id_seller', 'id_user');
+        // id_seller di tabel seller = id_user dari users
+    }
+
+    // kalau role customer → ada 1 data di tabel customer
+    public function customer(): HasOne
+    {
+        return $this->hasOne(Customer::class, 'id_customer', 'id_user');
+        // id_customer di tabel customer = id_user dari users
     }
 }
